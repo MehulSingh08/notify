@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .center {
+      width: 80%;
+      max-width: 500px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .location-entry {
+      font-size: 18px;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: calc(100% - 100px);
+      margin-bottom: 15px;
+      transition: border-color 0.3s ease;
+    }
+
+    .location-entry:focus {
+      border-color: #4CAF50;
+    }
+
+    .center button {
+      font-size: 18px;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .center button:hover {
+      background-color: #45a049;
+    }
+
+    #weather {
+      font-size: 24px;
+      margin-top: 30px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="center">
+    <h1>Welcome to the Weather App</h1>
+    <div id="locationInput">
+      <input class="location-entry" type="text" id="location" placeholder="Enter location">
+      <button onclick="getWeatherByLocation()">Get Weather</button>
+    </div>
+
+    <div id="weather">Fetching..</div>
+  </div>
+    <script>
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition, showError);
+      } else {
+        alert("Geolocation is not supported by this browser.");
+      }
+    }
+
+    function showPosition(position) {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+      getWeatherByCoords(latitude, longitude);
+    }
+
+    function getWeatherByCoords(latitude, longitude) {
+      const apiKey = "7bc13029f7ad6ec2db116bf5f90184b9";
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
+
+      fetchWeather(apiUrl);
+    }
+
+    function getWeatherByLocation() {
+      const location = document.getElementById("location").value;
+      const apiKey = "7bc13029f7ad6ec2db116bf5f90184b9";
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric`;
+
+      fetchWeather(apiUrl);
+    }
+
+    function fetchWeather(apiUrl) {
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          const { name, weather, main } = data;
+          const weatherDescription = weather[0].description;
+          const temperature = main.temp;
+
+          showNotification(name, weatherDescription, temperature);
+        })
+        .catch(error => {
+          console.error("Error fetching weather data:", error);
+        });
+    }
+
+    function showNotification(city, weatherDescription, temperature) {
+      const weatherElement = document.getElementById("weather");
+      weatherElement.innerHTML = `
+        <h2>${city} Weather</h2>
+        <p>${weatherDescription}</p>
+        <p>Temperature: ${temperature}°C</p>
+      `;
+      
+      // Show an alert box for the temperature
+      alert(`Current temperature in ${city}: ${temperature}°C`);
+    }
+
+    function showError(error) {
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          alert("User denied the request for Geolocation.");
+          break;
+        case error.POSITION_UNAVAILABLE:
+          alert("Location information is unavailable.");
+          break;
+        case error.TIMEOUT:
+          alert("The request to get user location timed out.");
+          break;
+        case error.UNKNOWN_ERROR:
+          alert("An unknown error occurred.");
+          break;
+      }
+    }
+
+    getLocation();
+  </script>
+</body>
+</html>
